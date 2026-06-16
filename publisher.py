@@ -54,7 +54,7 @@ while cap.isOpened():
         print("Falha ao receber frame (fim do streaming ou instabilidade de rede).")
         break
 
-    # Pegar as dimensões dinamicamente (importante pois depende da resolução do vídeo)
+    # Pegar as dimensões dinamicamente (depende da resolução do vídeo)
     altura, largura, _ = frame.shape
 
     # =========================================================================
