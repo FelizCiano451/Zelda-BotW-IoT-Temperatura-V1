@@ -1,15 +1,15 @@
 import cv2
 import time
 import paho.mqtt.client as mqtt
+from yt_dlp import YoutubeDL
 
 # ==========================================
 # CONFIGURAÇÕES DO MQTT
 # ==========================================
-BROKER_MQTT = "localhost"  # Com o Mosquitto rodando localmente
+BROKER_MQTT = "localhost"
 PORTA_MQTT = 1883
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 
-# Inicializa o cliente MQTT
 print("[MQTT] Conectando ao broker...")
 cliente_mqtt = mqtt.Client()
 try:
@@ -20,70 +20,73 @@ except Exception as e:
     print(f"[MQTT] Erro ao conectar: {e}. O broker Mosquitto está ativo?")
 
 # ==========================================
-# CONFIGURAÇÕES DE VÍDEO (OPENCV)
+# CONFIGURAÇÕES DE STREAMING DO YOUTUBE
 # ==========================================
-# Substituir pelo caminho do vídeo de gameplay do Zelda
-CAMINHO_VIDEO = "gameplay_zelda.mp4" 
+URL_YOUTUBE = "https://youtu.be/LtQLKo0T4Co?si=38qc_EH5i_E1ndZS" # Longplay
 
-cap = cv2.VideoCapture(CAMINHO_VIDEO)
+print("[YOUTUBE] Extraindo URL de streaming...")
+ydl_opts = {
+    'format': 'best[height<=720]',  # Limitar para 720p para economizar banda e processamento local (Precisa? Não sei, mas é bom. Qualquer coisa eu tiro)
+    'quiet': True
+}
 
-if not cap.isOpened():
-    print(f"Erro: Não foi possível abrir o vídeo '{CAMINHO_VIDEO}'.")
+try:
+    with YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(URL_YOUTUBE, download=False)
+        # Obtém a URL direta do fluxo de vídeo
+        url_streaming = info_dict.get('url')
+except Exception as e:
+    print(f"Erro ao obter vídeo do YouTube: {e}")
     exit()
 
-print("[SISTEMA] Iniciando monitoramento da HUD de Hyrule...")
+# O OpenCV abre a URL de streaming direto do servidor do Google
+cap = cv2.VideoCapture(url_streaming)
+
+if not cap.isOpened():
+    print("Erro: Não foi possível carregar o streaming do YouTube.")
+    exit()
+
+print("[SISTEMA] Iniciando monitoramento da HUD de Hyrule via YouTube...")
 
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
-        print("Fim do vídeo ou erro na leitura do frame.")
+        print("Falha ao receber frame (fim do streaming ou instabilidade de rede).")
         break
 
-    # Pegar as dimensões do vídeo para calcular a posição da HUD
+    # Pegar as dimensões dinamicamente (importante pois depende da resolução do vídeo)
     altura, largura, _ = frame.shape
 
     # =========================================================================
     # RECORTE DA HUD (Região de Interesse - ROI)
-    # No Zelda BotW, o termômetro fica no canto inferior direito.
-    # Ajustar os valores abaixo conforme a resolução do vídeo.
+    # Focado no canto inferior direito do Zelda BotW
     # =========================================================================
-    # Teste 1 para vídeo 1080p (1920x1080): pegando o canto inferior direito
-    y_inicio = int(altura * 0.75)  # Começa em 75% da altura
-    y_fim = int(altura * 0.95)     # Vai até 95% da altura
-    x_inicio = int(largura * 0.80) # Começa em 80% da largura
-    x_fim = int(largura * 0.98)    # Vai até 98% da largura
+    y_inicio = int(altura * 0.75)
+    y_fim = int(altura * 0.95)
+    x_inicio = int(largura * 0.80)
+    x_fim = int(largura * 0.98)
 
     hud_clima = frame[y_inicio:y_fim, x_inicio:x_fim]
 
-    # =========================================================================
-    # LÓGICA DE PROCESSAMENTO DA IMAGEM
-    # Aqui entrará a análise de cor ou correspondência de imagem.
-    # Por enquanto, simulamr o valor que seria extraído para testar o MQTT.
-    # =========================================================================
-    temperatura_simulada = 22.5 # Substituir pela leitura real do OpenCV
+    # Simulação do dado extraído (para validação do fluxo do protocolo MQTT)
+    temperatura_simulada = 18.0 
     
-    # Publica o dado no Broker MQTT
     payload = f"{temperatura_simulada}°C"
     cliente_mqtt.publish(TOPICO_TEMPERATURA, payload)
-    print(f"[PUBLISHER] Dados de Hyrule enviados -> {payload}")
+    print(f"[PUBLISHER] Enviado via MQTT -> {payload}")
 
     # ==========================================
-    # EXIBIÇÃO DAS JANELAS (Interface Gráfica)
+    # EXIBIÇÃO DAS JANELAS
     # ==========================================
-    # Mostra o jogo completo
-    cv2.imshow("Gameplay - Visao Geral", frame)
-    
-    # Mostra apenas o recorte que o algoritmo está analisando
+    cv2.imshow("Gameplay - YouTube Streaming", frame)
     cv2.imshow("HUD - Termometro Isolado", hud_clima)
 
-    # Tecla 'q' para sair do loop
-    if cv2.waitKey(30) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    # Delay para não inundar o broker (envia a cada 2 segundos)
+    # Aguarda 2 segundos antes de processar o próximo frame/enviar o dado
     time.sleep(2)
 
-# Limpeza final
 cap.release()
 cv2.destroyAllWindows()
 cliente_mqtt.loop_stop()
