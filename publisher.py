@@ -39,7 +39,7 @@ except Exception as e:
     print(f"Erro ao obter vídeo do YouTube: {e}")
     exit()
 
-# O OpenCV abre a URL de streaming direto do servidor do Google
+# O OpenCV abre a URL de streaming do servidor da Google
 cap = cv2.VideoCapture(url_streaming)
 
 if not cap.isOpened():
