@@ -29,18 +29,18 @@ except Exception as e:
 # Mapeia cada região para sua respectiva URL e faixa de temperatura base
 BIOMAS_ZELDA = {
     "Planicie de Hyrule (Temperado)": {
-        "url": "https://www.youtube.com/watch?v=N8ZgM_YvRbc", #Não é um link de verdade
-        "temp_base": 20.0,
+        "url": "https://www.youtube.com/watch?v=w7NszvnqO1w", 
+        "temp_base": 25.0,
         "variacao": 4.0
     },
-    "Deserto Gerudo (Quente)": {
-        "url": "https://www.youtube.com/watch?v=SUO8n4EclUM", #Não é um link de verdade
-        "temp_base": 38.0,
+    "Montanha da Morte (Quente)": {
+        "url": "https://www.youtube.com/watch?v=TGk2DHYYBV8",
+        "temp_base": 50.0,
         "variacao": 6.0
     },
     "Montanhas de Hebra (Gelado)": {
-        "url": "https://www.youtube.com/watch?v=u66C-Vv6Xkw", #Não é um link de verdade
-        "temp_base": -8.0,
+        "url": "https://www.youtube.com/watch?v=_xSti7DlmDE",
+        "temp_base": -10.0,
         "variacao": 5.0
     }
 }
