@@ -6,7 +6,7 @@ from datetime import datetime
 # =========================================================================
 # CONFIGURAÇÕES DO PROTOCOLO MQTT (VERSÃO HIVEMQ CLOUD PRIVADO)
 # =========================================================================
-BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud:8883"
+BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud"
 PORTA_MQTT = 8883                                   
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 
@@ -30,10 +30,13 @@ try:
     # Correção de compatibilidade para a versão recente do paho-mqtt
     cliente_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
+    cliente_mqtt.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS_CLIENT)
+    cliente_mqtt.username_pw_set(USUARIO_MQTT, SENHA_MQTT)
+    
     # Callback de conexão atualizado para a API v2
     def on_connect(client, userdata, flags, reason_code, properties=None):
         if reason_code == 0: 
-            print("[MQTT] Conectado com sucesso ao broker local!")
+            print("[MQTT] Conectado com sucesso ao HiveMQ!")
             try: 
                 client.subscribe(TOPICO_TEMPERATURA)
                 print(f"[MQTT] Inscrição confirmada no tópico: {TOPICO_TEMPERATURA}")
