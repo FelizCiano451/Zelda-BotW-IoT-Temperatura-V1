@@ -6,19 +6,27 @@ import paho.mqtt.client as mqtt
 from yt_dlp import YoutubeDL
 
 # =========================================================================
-# 1. CONFIGURAÇÕES DO PROTOCOLO MQTT
+# 1. CONFIGURAÇÕES DO PROTOCOLO MQTT (VERSÃO HIVEMQ CLOUD PRIVADO)
 # =========================================================================
-BROKER_MQTT = "localhost"
-PORTA_MQTT = 1883
+BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud:8883" # Seu endereço do painel
+PORTA_MQTT = 8883 # Alterado para a porta criptografada TLS
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 
-print("[MQTT] Inicializando cliente...")
-cliente_mqtt = mqtt.Client()
+# Suas credenciais criadas no painel da HiveMQ
+USUARIO_MQTT = "Zelda"
+SENHA_MQTT = "Tloz19862026"
+
+print("[MQTT] Inicializando cliente (API V2)...")
+cliente_mqtt = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+
+# Configurações de segurança obrigatórias para a nuvem privada:
+cliente_mqtt.tls_set(tls_version=mqtt.ssl.PROTOCOL_TLS_CLIENT)
+cliente_mqtt.username_pw_set(USUARIO_MQTT, SENHA_MQTT)
 
 try:
     cliente_mqtt.connect(BROKER_MQTT, PORTA_MQTT, 60)
     cliente_mqtt.loop_start()
-    print("[MQTT] Conectado com sucesso ao broker local!")
+    print("[MQTT] Conectado com sucesso ao HiveMQ Cloud Privado!")
 except Exception as e:
     print(f"[MQTT] AVISO: Não foi possível conectar ao broker ({e}).")
     print("[MQTT] O script continuará rodando em modo de simulação visual offline.\n")
