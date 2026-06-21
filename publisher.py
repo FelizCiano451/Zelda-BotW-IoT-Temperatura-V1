@@ -8,7 +8,7 @@ from yt_dlp import YoutubeDL
 # =========================================================================
 # 1. CONFIGURAÇÕES DO PROTOCOLO MQTT (VERSÃO HIVEMQ CLOUD PRIVADO)
 # =========================================================================
-BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud:8883" 
+BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud" 
 PORTA_MQTT = 8883 
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 
