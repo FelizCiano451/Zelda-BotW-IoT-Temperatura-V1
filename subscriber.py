@@ -4,12 +4,19 @@ from matplotlib.animation import FuncAnimation
 from datetime import datetime
 
 # =========================================================================
-# CONFIGURAÇÕES DO PROTOCOLO MQTT
+# CONFIGURAÇÕES DO PROTOCOLO MQTT (VERSÃO HIVEMQ CLOUD PRIVADO)
 # =========================================================================
-BROKER_MQTT = "localhost"
-PORTA_MQTT = 1883
+BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud:8883"
+PORTA_MQTT = 8883                                   
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 
+# Credenciais criadas no painel da HiveMQ
+USUARIO_MQTT = "Zelda"
+SENHA_MQTT = "Tloz19862026"
+
+# =========================================================================
+# ESTRUTURAS DE ARMAZENAMENTO
+# =========================================================================
 # Listas globais para armazenar o histórico dos dados para o gráfico
 tempos = []
 temperaturas = []
