@@ -38,20 +38,33 @@ except Exception as e:
     print("[MQTT] O script continuará rodando em modo offline.\n")
 
 # =========================================================================
-# 2. DICIONÁRIO DE BIOMAS (Configurações Térmicas)
+# 2. DICIONÁRIO DE BIOMAS EXPANDIDO (6 Ambientes de Hyrule)
 # =========================================================================
+# Mapeia cada região para sua respectiva faixa de temperatura base e variação
 BIOMAS_ZELDA = {
     "Planicie de Hyrule (Temperado)": {
         "temp_base": 25.0,
         "variacao": 4.0
     },
-    "Montanha da Morte (Quente)": {
-        "temp_base": 50.0,
-        "variacao": 6.0
-    },
-    "Montanhas de Hebra (Gelado)": {
-        "temp_base": -10.0,
+    "Montanha da Morte (Calor Vulcanico)": {
+        "temp_base": 52.0,
         "variacao": 5.0
+    },
+    "Montanhas de Hebra (Gelado Alpino)": {
+        "temp_base": -12.0,
+        "variacao": 4.0
+    },
+    "Deserto Gerudo (Calor Diurno)": {
+        "temp_base": 41.0,
+        "variacao": 4.5
+    },
+    "Deserto Gerudo (Gelo Noturno)": {
+        "temp_base": -2.0,
+        "variacao": 3.0
+    },
+    "Regiao de Lanayru (Subtropical/Umido)": {
+        "temp_base": 22.0,
+        "variacao": 2.5
     }
 }
 
