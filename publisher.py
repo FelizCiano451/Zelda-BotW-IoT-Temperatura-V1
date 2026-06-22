@@ -2,29 +2,34 @@ import time
 import math
 import random
 import paho.mqtt.client as mqtt
+import ssl  # Garantindo a importação para suporte a TLS/SSL
 
 # =========================================================================
-# 1. CONFIGURAÇÕES DO PROTOCOLO MQTT (BROKER HIVEMQ COM AUTENTICAÇÃO)
+# 1. CONFIGURAÇÕES DO PROTOCOLO MQTT (BROKER HIVEMQ CLOUD SECURE)
 # =========================================================================
-BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud"
+BROKER_MQTT = "6be44a2810bc469cb87c7054389b42e7.s1.eu.hivemq.cloud"  
 PORTA_MQTT = 8883                  
 TOPICO_TEMPERATURA = "hyrule/monitoramento/temperatura"
 KEEPALIVE_MQTT = 60
 
-# INSIRA SUAS CREDENCIAIS DO HIVEMQ AQUI:
+# INSIRir AS CREDENCIAIS CRIADAS NO PAINEL DO HIVEMQ CLOUD:
 USUARIO_HIVEMQ = "Zelda"
 SENHA_HIVEMQ = "Tloz19862026"
 
 print("[MQTT] Inicializando cliente...")
 cliente_mqtt = mqtt.Client()
 
-# Configurando a autenticação de usuário e senha
+# A. Configura as credenciais de usuário e senha
 if USUARIO_HIVEMQ and SENHA_HIVEMQ:
     cliente_mqtt.username_pw_set(USUARIO_HIVEMQ, SENHA_HIVEMQ)
     print("[MQTT] Credenciais de autenticação configuradas.")
 
+# B. ATIVA A SEGURANÇA TLS
+cliente_mqtt.tls_set(cert_reqs=ssl.CERT_REQUIRED)
+print("[MQTT] Segurança TLS/SSL ativada para conexão em nuvem.")
+
 try:
-    print(f"[MQTT] Tentando conectar ao broker em nuvem ({BROKER_MQTT})...")
+    print(f"[MQTT] Tentando conectar de forma segura ao cluster ({BROKER_MQTT})...")
     cliente_mqtt.connect(BROKER_MQTT, PORTA_MQTT, KEEPALIVE_MQTT)
     cliente_mqtt.loop_start()
     print("[MQTT] Conectado com sucesso ao broker HiveMQ!")
@@ -57,7 +62,7 @@ MAX_LEITURAS_POR_BIOMA = 15
 # 3. LOOP PRINCIPAL - TRANSIÇÃO SIMULADA ENTRE BIOMAS
 # =========================================================================
 try:
-    while True:
+    while True:  # Loop infinito para manter o monitoramento contínuo
         for nome_bioma, config in BIOMAS_ZELDA.items():
             print("\n" + "="*60)
             print(f"[AMBIENTE] Alterando sensor para o bioma: {nome_bioma}")
@@ -70,9 +75,12 @@ try:
                 
                 # =============================================================
                 # GERADOR DINÂMICO DE TELEMETRIA
+                # Usa a função seno baseada no tempo + ruído aleatório do sensor
                 # =============================================================
                 tempo_decorrido = contador_leituras * 0.5
                 fator_oscilacao = math.sin(tempo_decorrido) * config["variacao"]
+                
+                # Adiciona uma pequena margem de erro típica de sensores reais 
                 ruido_sensor = random.uniform(-0.4, 0.4) 
                 
                 temperatura_calculada = round(config["temp_base"] + fator_oscilacao + ruido_sensor, 2)
@@ -80,6 +88,7 @@ try:
                 # =============================================================
                 # ENVIO DOS DADOS FORMATADOS VIA MQTT
                 # =============================================================
+                # Formato CSV estruturado herdado da base: "valor,bioma"
                 payload = f"{temperatura_calculada},{nome_bioma}"
                 
                 try:
@@ -88,12 +97,16 @@ try:
                 except Exception as e:
                     print(f"[MQTT ERRO] Falha ao publicar payload: {e}")
 
+                # Incrementa contador do bioma atual
                 contador_leituras += 1
+
+                # Intervalo de amostragem de dados estável (2 segundos)
                 time.sleep(2)
 
 except KeyboardInterrupt:
     print("\n[SISTEMA] Interrupção manual acionada pelo usuário.")
 finally:
+    # Garante o encerramento limpo dos recursos de rede
     try:
         cliente_mqtt.loop_stop()
         cliente_mqtt.disconnect()
